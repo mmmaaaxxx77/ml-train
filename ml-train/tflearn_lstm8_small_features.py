@@ -1,13 +1,18 @@
 from __future__ import division, print_function, absolute_import
 
 import pickle
+
+import pyprind
 import random
 import os
 import tflearn
 import jieba
 import numpy as np
 import re
+from sklearn import manifold
 from tflearn import bidirectional_rnn, BasicLSTMCell
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 jieba.load_userdict("senti/dict/dict.txt.big.txt")
 jieba.load_userdict("senti/dict/NameDict_Ch_v2")
@@ -16,6 +21,8 @@ jieba.load_userdict("senti/dict/ntusd-positive.txt")
 jieba.load_userdict("senti/dict/鄉民擴充辭典.txt")
 
 dictionary = dict(n=0)
+feature_length = 100
+dictionary_dist = dict()
 X = []
 Y = []
 default_term_length = 5
@@ -40,6 +47,8 @@ comma_tokenizer = lambda x: jieba.cut(x, cut_all=False, HMM=True)
 mode_pkl = "senti/model/seq2seq.pkl"
 dictionary_pkl = "senti/model/seq2seq_dict.pkl"
 
+clf = manifold.LocallyLinearEmbedding(feature_length-1, n_components=feature_length, method='standard')
+
 
 def clear_doc(doc):
     # 去除網址和符號
@@ -53,12 +62,13 @@ def clear_doc(doc):
 
 
 def set_to_dictionary(term):
+    term = str(term)
     if term in dictionary.keys():
-        return dictionary[term]
+        return term
     else:
         _index = len(dictionary)
         dictionary[term] = _index
-    return _index
+    return term
 
 
 def stream_docs(path):
@@ -75,7 +85,7 @@ def stream_docs(path):
                 if ind+1 < len(terms):
                     y_part.append(terms[ind + 1])
                 else:
-                    y_part.append(0)
+                    y_part.append("n")
             x.append(terms)
             y.append(y_part)
     return x, y
@@ -90,44 +100,59 @@ else:
     dictionary = pickle.load(open(dictionary_pkl, 'rb'))
 
 
+def create_dictionary_dist():
+    for key in dictionary.keys():
+        _dictionary_array = np.zeros((len(dictionary), ), dtype=np.int8)
+        id = dictionary[key]
+        _dictionary_array[id] = 1
+        dictionary_dist[key] = _dictionary_array
+
+    clf.fit([dictionary_dist[a] for a in dictionary_dist.keys()])
+    pyr = pyprind.ProgBar(len(dictionary_dist.keys()))
+    for dcst_str in dictionary_dist.keys():
+        dictionary_dist[dcst_str] = clf.transform(dictionary_dist[dcst_str])
+        pyr.update()
+
+
 def get_docs_labels(doc_streams):
     docs, y = [], []
     for doc_stream in doc_streams:
         raw_terms, raw_nexts = doc_stream
-        matrix = np.zeros((max_len, len(dictionary)), dtype=np.bool)
+        matrix = np.zeros((max_len, feature_length), dtype=np.bool)
 
         il = 0
         while True:
             for it in range(il, len(raw_terms)):
                 count = 0
                 for word_index in range(0, len(raw_terms[it])):
-                    word_id = raw_terms[it][word_index]
-                    next_word_id = raw_nexts[it][word_index]
-                    matrix[count][word_id] = 1
+                    word_str = raw_terms[it][word_index]
+                    next_word_str = raw_nexts[it][word_index]
+                    matrix[count] = dictionary_dist[word_str]
                     count += 1
                     if count == max_len or word_index == len(raw_terms[it])-1 or\
                             (word_index == len(raw_terms[it])-1 and it == len(raw_terms)-1):
                         docs.append(matrix)
-                        matrix = np.zeros((max_len, len(dictionary)), dtype=np.bool)
-                        y_m = np.zeros(len(dictionary), dtype=np.bool)
-                        y_m[next_word_id] = 1
+                        matrix = np.zeros((max_len, feature_length), dtype=np.bool)
+                        y_m = dictionary_dist[str(next_word_str)][0]
                         y.append(y_m)
                         count = 0
             il += 1
             if il == len(raw_terms):
                 break
     return docs, y
-
+print("文字向量建立開始")
+create_dictionary_dist()
+print("文字向量建立完成")
 # Network building
-net = tflearn.input_data(shape=[None, max_len, len(dictionary)])
-#net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
-net = tflearn.lstm(net, 512, return_seq=True)
+net = tflearn.input_data(shape=[None, max_len, feature_length])
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
+#net = tflearn.lstm(net, 512, return_seq=True)
 net = tflearn.dropout(net, 0.5)
-net = tflearn.lstm(net, 512, return_seq=True)
-net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512))
-net = tflearn.dropout(net, 0.5)
-net = tflearn.fully_connected(net, len(dictionary), activation='softmax')
+#net = tflearn.lstm(net, 512, return_seq=True)
+#net = tflearn.dropout(net, 0.5)
+#net = tflearn.lstm(net, 512)
+#net = tflearn.dropout(net, 0.5)
+net = tflearn.fully_connected(net, feature_length, activation='softmax')
 net = tflearn.regression(net, optimizer='adam', learning_rate=0.001,
                          loss='categorical_crossentropy')
 
@@ -153,7 +178,7 @@ if not os.path.exists(dictionary_pkl):
 else:
     model.load(mode_pkl)
 
-seed = [random.choice(list(dictionary.keys()))]
+seed = [random.choice(list(dictionary_dist.keys()))]
 s = model.generate(5, temperature=0.5, seq_seed=seed)
 seed.extend(s[len(seed):])
 print("".join(seed))

@@ -120,13 +120,13 @@ def get_docs_labels(doc_streams):
 
 # Network building
 net = tflearn.input_data(shape=[None, max_len, len(dictionary)])
-#net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
-net = tflearn.lstm(net, 512, return_seq=True)
-net = tflearn.dropout(net, 0.5)
-net = tflearn.lstm(net, 512, return_seq=True)
-net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512))
+#net = tflearn.lstm(net, 512, return_seq=True)
 net = tflearn.dropout(net, 0.5)
+#net = tflearn.lstm(net, 512, return_seq=True)
+#net = tflearn.dropout(net, 0.5)
+#net = tflearn.lstm(net, 512)
+#net = tflearn.dropout(net, 0.5)
 net = tflearn.fully_connected(net, len(dictionary), activation='softmax')
 net = tflearn.regression(net, optimizer='adam', learning_rate=0.001,
                          loss='categorical_crossentropy')

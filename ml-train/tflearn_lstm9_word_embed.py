@@ -7,7 +7,6 @@ import tflearn
 import jieba
 import numpy as np
 import re
-from tflearn import bidirectional_rnn, BasicLSTMCell
 
 jieba.load_userdict("senti/dict/dict.txt.big.txt")
 jieba.load_userdict("senti/dict/NameDict_Ch_v2")
@@ -94,7 +93,7 @@ def get_docs_labels(doc_streams):
     docs, y = [], []
     for doc_stream in doc_streams:
         raw_terms, raw_nexts = doc_stream
-        matrix = np.zeros((max_len, len(dictionary)), dtype=np.bool)
+        matrix = np.zeros((max_len,), dtype=np.bool)
 
         il = 0
         while True:
@@ -103,15 +102,21 @@ def get_docs_labels(doc_streams):
                 for word_index in range(0, len(raw_terms[it])):
                     word_id = raw_terms[it][word_index]
                     next_word_id = raw_nexts[it][word_index]
-                    matrix[count][word_id] = 1
+                    matrix[count] = word_id
                     count += 1
-                    if count == max_len or word_index == len(raw_terms[it])-1 or\
-                            (word_index == len(raw_terms[it])-1 and it == len(raw_terms)-1):
+                    if count == max_len:
+                        y_m = np.zeros(max_len, dtype=np.bool)
+                        for w_ind in range(0, max_len):
+                            w_i = word_index + w_ind
+                            if w_i >= len(raw_terms[it]):
+                                break
+                            w_id = raw_terms[it][w_i]
+                            y_m[w_ind] = w_id
+                        if word_index+max_len >= len(raw_terms[it]):
+                            break
                         docs.append(matrix)
-                        matrix = np.zeros((max_len, len(dictionary)), dtype=np.bool)
-                        y_m = np.zeros(len(dictionary), dtype=np.bool)
-                        y_m[next_word_id] = 1
                         y.append(y_m)
+                        matrix = np.zeros((max_len,), dtype=np.bool)
                         count = 0
             il += 1
             if il == len(raw_terms):
@@ -119,13 +124,13 @@ def get_docs_labels(doc_streams):
     return docs, y
 
 # Network building
-net = tflearn.input_data(shape=[None, max_len, len(dictionary)])
-#net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
+net = tflearn.input_data(shape=[None, max_len])
+net = tflearn.embedding(net, input_dim=len(dictionary), output_dim=128)
 net = tflearn.lstm(net, 512, return_seq=True)
 net = tflearn.dropout(net, 0.5)
 net = tflearn.lstm(net, 512, return_seq=True)
 net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512))
+net = tflearn.lstm(net, 512)
 net = tflearn.dropout(net, 0.5)
 net = tflearn.fully_connected(net, len(dictionary), activation='softmax')
 net = tflearn.regression(net, optimizer='adam', learning_rate=0.001,
@@ -145,7 +150,7 @@ if not os.path.exists(dictionary_pkl):
     print(len(dictionary))
     print("{}, {}".format(len(trainX), len(trainY)))
     print("{}, {}".format(np.array(trainX).shape, np.array(trainY).shape))
-    model.fit(trainX, trainY, validation_set=0.1, batch_size=128,
+    model.fit(trainX, trainY, validation_set=0.1, batch_size=100,
               n_epoch=1)
     pickle.dump(dictionary, open(dictionary_pkl, 'wb'), protocol=4)
     #pickle.dump(model, open(mode_pkl, 'wb'), protocol=4)
