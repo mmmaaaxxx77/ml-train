@@ -125,7 +125,7 @@ net = tflearn.lstm(net, 512, return_seq=True)
 net = tflearn.dropout(net, 0.5)
 net = tflearn.lstm(net, 512, return_seq=True)
 net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512))
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
 net = tflearn.dropout(net, 0.5)
 net = tflearn.fully_connected(net, len(dictionary), activation='softmax')
 net = tflearn.regression(net, optimizer='adam', learning_rate=0.001,
@@ -146,7 +146,7 @@ if not os.path.exists(dictionary_pkl):
     print("{}, {}".format(len(trainX), len(trainY)))
     print("{}, {}".format(np.array(trainX).shape, np.array(trainY).shape))
     model.fit(trainX, trainY, validation_set=0.1, batch_size=128,
-              n_epoch=30)
+              n_epoch=1)
     pickle.dump(dictionary, open(dictionary_pkl, 'wb'), protocol=4)
     #pickle.dump(model, open(mode_pkl, 'wb'), protocol=4)
     model.save(mode_pkl)
