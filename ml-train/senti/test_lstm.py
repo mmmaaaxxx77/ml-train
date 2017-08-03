@@ -54,7 +54,7 @@ comma_tokenizer = lambda x: jieba.cut(x, cut_all=False, HMM=True)
 dictionary = dict()
 dict_counter = 0
 dictionary_dict = None
-max_length = 30
+max_length = 20
 
 model_pkl = "model/mode_senti3_model.pkl"
 dictionary_pkl = "model/mode_senti3_dictionary.pkl"
