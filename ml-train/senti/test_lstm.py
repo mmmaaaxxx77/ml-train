@@ -175,7 +175,7 @@ print("{}, {}".format(np.array(x_train).shape, np.array(y_train).shape))
 model = tflearn.DNN(net, tensorboard_verbose=0, tensorboard_dir="log/")
 
 model.fit(x_train, y_train, validation_set=(test_x, test_y), show_metric=True,
-          batch_size=10000, run_id="lstm_senti_2t2", n_epoch=1)
+          batch_size=128, run_id="lstm_senti_2t2", n_epoch=30)
 
 
 def pre_clear(sentence):
