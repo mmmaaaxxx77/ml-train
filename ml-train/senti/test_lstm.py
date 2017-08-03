@@ -54,10 +54,11 @@ comma_tokenizer = lambda x: jieba.cut(x, cut_all=False, HMM=True)
 dictionary = dict()
 dict_counter = 0
 dictionary_dict = None
-max_length = 10
+max_length = 30
 
-model_pkl = "model/mode_senti2_model.pkl"
-dictionary_pkl = "model/mode_senti2_dictionary.pkl"
+model_pkl = "model/mode_senti3_model.pkl"
+dictionary_pkl = "model/mode_senti3_dictionary.pkl"
+
 
 def clear_doc(doc):
     # 去除網址和符號
@@ -90,6 +91,8 @@ def stream_docs(path, label):
             #x.append([set_to_dictionary(i) for i in comma_tokenizer(text)])
             terms = comma_tokenizer(text)
             terms = list(terms)
+            if len(terms) < max_length:
+                continue
             count = 0
             sub = [0]*max_length
             for i in range(0, len(terms)):
@@ -113,6 +116,8 @@ def test_stream_docs(path, label):
                 continue
             terms = comma_tokenizer(text)
             terms = list(terms)
+            if len(terms) < max_length:
+                continue
             count = 0
             sub = [0]*max_length
             for i in range(0, len(terms)):
@@ -140,9 +145,9 @@ def get_docs_labels(doc_streams):
             print("ERROR")
     return docs, y
 
-doc_streams = [stream_docs(path='data/n/broken-heart.txt', label=0), stream_docs(path='data/p/adulation.txt', label=1)]
+doc_streams = [stream_docs(path='data/n/twneg.txt', label=0), stream_docs(path='data/p/twpos.txt', label=1)]
                #stream_docs(path='data/p/kindness.txt', label=1)]
-test_doc_streams = [test_stream_docs(path='data/p/kindness.txt', label=1), test_stream_docs(path='data/n/twneg.txt', label=1)]
+test_doc_streams = [test_stream_docs(path='data/p/kindness.txt', label=1), test_stream_docs(path='data/n/negative.txt', label=0)]
 x, y = get_docs_labels(doc_streams)
 print("前處理完成")
 
@@ -168,7 +173,41 @@ test_y = to_categorical(test_y, nb_classes=2)
 # Training
 print("{}, {}".format(np.array(x_train).shape, np.array(y_train).shape))
 model = tflearn.DNN(net, tensorboard_verbose=0, tensorboard_dir="log/")
+
 model.fit(x_train, y_train, validation_set=(test_x, test_y), show_metric=True,
-          batch_size=128, run_id="lstm_senti_2", n_epoch=100)
+          batch_size=10000, run_id="lstm_senti_2t2", n_epoch=1)
+
+
+def pre_clear(sentence):
+    text = clear_doc(sentence)
+    if len(text) == 0:
+        return None
+    terms = comma_tokenizer(text)
+    terms = list(terms)
+    if len(terms) < max_length:
+        return None
+    count = 0
+    sub = [0] * max_length
+    for i in range(0, len(terms)):
+        try:
+            sub[count] = dictionary[str(terms[i])]
+        except:
+            continue
+        count += 1
+        if count == max_length:
+            x.append(sub)
+            count = 0
+            sub = [0] * max_length
+    return sub
 model.save(model_pkl)
 pickle.dump(dictionary, open(dictionary_pkl, 'wb'), protocol=4)
+
+#model.load(model_pkl)
+#dictionary = pickle.load(open(dictionary_pkl, 'rb'))
+
+print(model.predict([pre_clear("從高中以來也認識好多個年頭了 真的很感謝一路相伴的那些好友們 我們永遠都相互扶持彼此打氣 在任何一個流淚的時刻 我知道你們一直在那裏 兩次的心碎都有願意陪在我身邊的人 真的很感謝你們 有你們在 我知道大風大浪都會過去的~~ 當我遇見真正的幸福 你們也會笑著祝福我 感謝你們一直以來的好 希望我們白髮蒼蒼的時候 也能三不五時這樣子聚會聊天玩鬧喔^^ 最愛你們大家了~")]))
+
+while True:
+    input_str = input("說說話吧: ")
+    print(model.predict(
+        [pre_clear(input_str)]))
