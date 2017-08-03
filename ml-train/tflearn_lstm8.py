@@ -100,13 +100,13 @@ def get_docs_labels(doc_streams):
         while True:
             for it in range(il, len(raw_terms)):
                 count = 0
+                matrix = np.zeros((max_len, len(dictionary)), dtype=np.bool)
                 for word_index in range(0, len(raw_terms[it])):
                     word_id = raw_terms[it][word_index]
                     next_word_id = raw_nexts[it][word_index]
                     matrix[count][word_id] = 1
                     count += 1
-                    if count == max_len or word_index == len(raw_terms[it])-1 or\
-                            (word_index == len(raw_terms[it])-1 and it == len(raw_terms)-1):
+                    if count == max_len:
                         docs.append(matrix)
                         matrix = np.zeros((max_len, len(dictionary)), dtype=np.bool)
                         y_m = np.zeros(len(dictionary), dtype=np.bool)
@@ -121,10 +121,6 @@ def get_docs_labels(doc_streams):
 # Network building
 net = tflearn.input_data(shape=[None, max_len, len(dictionary)])
 #net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
-net = tflearn.lstm(net, 512, return_seq=True)
-net = tflearn.dropout(net, 0.5)
-net = tflearn.lstm(net, 512, return_seq=True)
-net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512))
 net = tflearn.dropout(net, 0.5)
 net = tflearn.fully_connected(net, len(dictionary), activation='softmax')

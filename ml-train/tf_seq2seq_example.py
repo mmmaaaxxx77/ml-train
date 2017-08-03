@@ -1,14 +1,7 @@
-'''
-Pedagogical example realization of seq2seq recurrent neural networks, using TensorFlow and TFLearn.
-More info at https://github.com/ichuang/tflearn_seq2seq
-'''
-
 from __future__ import division, print_function
 
 import os
-import sys
 import tflearn
-import argparse
 import json
 
 import numpy as np
@@ -17,15 +10,15 @@ import tensorflow as tf
 
 # -----------------------------------------------------------------------------
 from tensorflow.contrib.legacy_seq2seq.python.ops import seq2seq
-from tensorflow.contrib.rnn import MultiRNNCell
+from tensorflow.contrib.rnn import MultiRNNCell, BasicLSTMCell
 from tensorflow.contrib.rnn.python.ops import rnn_cell
 
 
 class SequencePattern(object):
     INPUT_SEQUENCE_LENGTH = 10
     OUTPUT_SEQUENCE_LENGTH = 10
-    INPUT_MAX_INT = 9
-    OUTPUT_MAX_INT = 9
+    INPUT_MAX_INT = 20
+    OUTPUT_MAX_INT = 20
     PATTERN_NAME = "sorted"
 
     def __init__(self, name=None, in_seq_len=None, out_seq_len=None):
@@ -182,16 +175,10 @@ class TFLearnSeq2Seq(object):
 
         feed_previous = not (mode == "train")
 
-        if self.verbose > 3:
-            print("feed_previous = %s" % str(feed_previous))
-            print("encoder inputs: %s" % str(encoder_inputs))
-            print("decoder inputs: %s" % str(decoder_inputs))
-            print("len decoder inputs: %s" % len(decoder_inputs))
-
         self.n_input_symbols = self.in_max_int + 1  # default is integers from 0 to 9
         self.n_output_symbols = self.out_max_int + 2  # extra "GO" symbol for decoder inputs
 
-        single_cell = getattr(rnn_cell, cell_type)(cell_size, state_is_tuple=True)
+        single_cell = BasicLSTMCell(cell_size, state_is_tuple=True)
         if num_layers == 1:
             cell = single_cell
         else:
@@ -223,15 +210,7 @@ class TFLearnSeq2Seq(object):
         tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + "seq2seq_model",
                              model_outputs)  # for TFLearn to know what to save and restore
 
-        # model_outputs: list of the same length as decoder_inputs of 2D Tensors with shape [batch_size x output_size] containing the generated outputs.
-        if self.verbose > 2: print("model outputs: %s" % model_outputs)
-        network = tf.stack(model_outputs,
-                           axis=1)  # shape [-1, n_decoder_inputs (= self.out_seq_len), num_decoder_symbols]
-        if self.verbose > 2: print("packed model outputs: %s" % network)
-
-        if self.verbose > 3:
-            all_vars = tf.get_collection(tf.GraphKeys.VARIABLES)
-            print("all_vars = %s" % all_vars)
+        network = tf.stack(model_outputs, axis=1)
 
         with tf.name_scope("TargetsData"):  # placeholder for target variable (i.e. trainY input)
             targetY = tf.placeholder(shape=[None, self.out_seq_len], dtype=tf.int32, name="Y")
@@ -270,10 +249,10 @@ class TFLearnSeq2Seq(object):
                   n_epoch=num_epochs,
                   validation_set=validation_set,
                   batch_size=batch_size,
-                  shuffle=True,
-                  show_metric=True,
-                  snapshot_step=snapshot_step,
-                  snapshot_epoch=False,
+                  #shuffle=True,
+                  #show_metric=True,
+                  #snapshot_step=snapshot_step,
+                  #snapshot_epoch=False,
                   run_id="TFLearnSeq2Seq"
                   )
         print("Done!")
@@ -356,119 +335,9 @@ class TFLearnSeq2Seq(object):
             print("Predicted output sequence: %s" % str(prediction))
         return prediction, y
 
-
-# -----------------------------------------------------------------------------
-
-class VAction(argparse.Action):
-    def __call__(self, parser, args, values, option_string=None):
-        curval = getattr(args, self.dest, 0) or 0
-        values = values.count('v') + 1
-        setattr(args, self.dest, values + curval)
-
-
-# -----------------------------------------------------------------------------
-
-def CommandLine(args=None, arglist=None):
-    '''
-    Main command line.  Accepts args, to allow for simple unit testing.
-    '''
-    help_text = """
-Commands:
-
-train - give size of training set to use, as argument
-predict - give input sequence as argument (or specify inputs via --from-file <filename>)
-
-"""
-    parser = argparse.ArgumentParser(description=help_text, formatter_class=argparse.RawTextHelpFormatter)
-
-    parser.add_argument("cmd", help="command")
-    parser.add_argument("cmd_input", nargs='*', help="input to command")
-    parser.add_argument('-v', "--verbose", nargs=0,
-                        help="increase output verbosity (add more -v to increase versbosity)", action=VAction,
-                        dest='verbose')
-    parser.add_argument("-m", "--model",
-                        help="seq2seq model name: either embedding_rnn (default) or embedding_attention", default=None)
-    parser.add_argument("-r", "--learning-rate", type=float, help="learning rate (default 0.0001)", default=0.0001)
-    parser.add_argument("-e", "--epochs", type=int, help="number of trainig epochs", default=10)
-    parser.add_argument("-i", "--input-weights", type=str, help="tflearn file with network weights to load",
-                        default=None)
-    parser.add_argument("-o", "--output-weights", type=str,
-                        help="new tflearn file where network weights are to be saved", default=None)
-    parser.add_argument("-p", "--pattern-name", type=str, help="name of pattern to use for sequence", default=None)
-    parser.add_argument("-n", "--name", type=str, help="name of model, used when generating default weights filenames",
-                        default=None)
-    parser.add_argument("--in-len", type=int, help="input sequence length (default 10)", default=None)
-    parser.add_argument("--out-len", type=int, help="output sequence length (default 10)", default=None)
-    parser.add_argument("--from-file", type=str, help="name of file to take input data sequences from (json format)",
-                        default=None)
-    parser.add_argument("--iter-num", type=int,
-                        help="training iteration number; specify instead of input- or output-weights to use generated filenames",
-                        default=None)
-    parser.add_argument("--data-dir",
-                        help="directory to use for storing checkpoints (also used when generating default weights filenames)",
-                        default=None)
-    # model parameters
-    parser.add_argument("-L", "--num-layers", type=int, help="number of RNN layers to use in the model (default 1)",
-                        default=1)
-    parser.add_argument("--cell-size", type=int, help="size of RNN cell to use (default 32)", default=32)
-    parser.add_argument("--cell-type", type=str, help="type of RNN cell to use (default BasicLSTMCell)",
-                        default="BasicLSTMCell")
-    parser.add_argument("--embedding-size", type=int, help="size of embedding to use (default 20)", default=20)
-    parser.add_argument("--tensorboard-verbose", type=int, help="tensorboard verbosity level (default 0)", default=0)
-
-    if not args:
-        args = parser.parse_args(arglist)
-
-    if args.iter_num is not None:
-        args.input_weights = args.iter_num
-        args.output_weights = args.iter_num + 1
-
-    model_params = dict(num_layers=args.num_layers,
-                        cell_size=args.cell_size,
-                        cell_type=args.cell_type,
-                        embedding_size=args.embedding_size,
-                        learning_rate=args.learning_rate,
-                        tensorboard_verbose=args.tensorboard_verbose,
-                        )
-
-    if args.cmd == "train":
-        try:
-            num_points = int(args.cmd_input[0])
-        except:
-            raise Exception("Please specify the number of datapoints to use for training, as the first argument")
-        sp = SequencePattern(args.pattern_name, in_seq_len=args.in_len, out_seq_len=args.out_len)
-        ts2s = TFLearnSeq2Seq(sp, seq2seq_model=args.model, data_dir=args.data_dir, name=args.name,
-                              verbose=args.verbose)
-        ts2s.train(num_epochs=args.epochs, num_points=num_points, weights_output_fn=args.output_weights,
-                   weights_input_fn=args.input_weights, model_params=model_params)
-        return ts2s
-
-    elif args.cmd == "predict":
-        if args.from_file:
-            inputs = json.loads(args.from_file)
-        try:
-            input_x = map(int, args.cmd_input)
-            inputs = [input_x]
-        except:
-            raise Exception("Please provide a space-delimited input sequence as the argument")
-
-        sp = SequencePattern(args.pattern_name, in_seq_len=args.in_len, out_seq_len=args.out_len)
-        ts2s = TFLearnSeq2Seq(sp, seq2seq_model=args.model, data_dir=args.data_dir, name=args.name,
-                              verbose=args.verbose)
-        results = []
-        for x in inputs:
-            prediction, y = ts2s.predict(x, weights_input_fn=args.input_weights, model_params=model_params)
-            print("==> For input %s, prediction=%s (expected=%s)" % (x, prediction, sp.generate_output_sequence(x)))
-            results.append([prediction, y])
-        ts2s.prediction_results = results
-        return ts2s
-
-    else:
-        print("Unknown command %s" % args.cmd)
-
-
 # -----------------------------------------------------------------------------
 # unit tests
+
 
 def test_sp1():
     '''
@@ -477,12 +346,15 @@ def test_sp1():
     sp = SequencePattern("maxmin_dup")
     y = sp.generate_output_sequence(range(10))
     assert all(y == np.array([9, 0, 2, 3, 4, 5, 6, 7, 8, 9]))
+    print(y)
     sp = SequencePattern("sorted")
     y = sp.generate_output_sequence([5, 6, 1, 2, 9])
     assert all(y == np.array([1, 2, 5, 6, 9]))
+    print(y)
     sp = SequencePattern("reversed")
     y = sp.generate_output_sequence(range(10))
     assert all(y == np.array([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]))
+    print(y)
 
 
 def test_sp2():
@@ -493,8 +365,10 @@ def test_sp2():
     x = np.random.randint(0, 9, 20)
     y = sp.generate_output_sequence(x)
     assert len(y) == 5
+    print(y)
     y_exp = sorted(x)[:5]
     assert all(y == y_exp)
+    print(y)
 
 
 def test_train1():
@@ -567,65 +441,4 @@ def test_train_predict3():
 
     os.system("rm -rf %s" % tempdir)
 
-
-def test_main1():
-    '''
-    Integration test - training
-    '''
-    import tempfile
-    tempdir = tempfile.mkdtemp()
-    arglist = "--data-dir %s -e 2 --iter-num=1 -v -v --tensorboard-verbose=1 train 5000" % tempdir
-    arglist = arglist.split(' ')
-    tf.reset_default_graph()
-    ts2s = CommandLine(arglist=arglist)
-    assert os.path.exists(ts2s.weights_output_fn)
-    os.system("rm -rf %s" % tempdir)
-
-
-def test_main2():
-    '''
-    Integration test - training then prediction
-    '''
-    import tempfile
-    tempdir = tempfile.mkdtemp()
-    arglist = "--data-dir %s -e 2 --iter-num=1 -v -v --tensorboard-verbose=1 train 5000" % tempdir
-    arglist = arglist.split(' ')
-    tf.reset_default_graph()
-    ts2s = CommandLine(arglist=arglist)
-    wfn = ts2s.weights_output_fn
-    assert os.path.exists(wfn)
-
-    arglist = "-i %s predict 1 2 3 4 5 6 7 8 9 0" % wfn
-    arglist = arglist.split(' ')
-    tf.reset_default_graph()
-    ts2s = CommandLine(arglist=arglist)
-    assert len(ts2s.prediction_results[0][0]) == 10
-
-    os.system("rm -rf %s" % tempdir)
-
-
-def test_main3():
-    '''
-    Integration test - training then prediction: attention model
-    '''
-    import tempfile
-    wfn = "tmp_weights.tfl"
-    if os.path.exists(wfn):
-        os.unlink(wfn)
-    arglist = "-e 2 -o tmp_weights.tfl -v -v -v -v -m embedding_attention train 5000"
-    arglist = arglist.split(' ')
-    tf.reset_default_graph()
-    ts2s = CommandLine(arglist=arglist)
-    assert os.path.exists(wfn)
-
-    arglist = "-i tmp_weights.tfl -v -v -v -v -m embedding_attention predict 1 2 3 4 5 6 7 8 9 0"
-    arglist = arglist.split(' ')
-    tf.reset_default_graph()
-    ts2s = CommandLine(arglist=arglist)
-    assert len(ts2s.prediction_results[0][0]) == 10
-
-
-# -----------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    CommandLine()
+test_predict1()
