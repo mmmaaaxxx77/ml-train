@@ -169,6 +169,6 @@ test_y = to_categorical(test_y, nb_classes=2)
 print("{}, {}".format(np.array(x_train).shape, np.array(y_train).shape))
 model = tflearn.DNN(net, tensorboard_verbose=0, tensorboard_dir="log/")
 model.fit(x_train, y_train, validation_set=(test_x, test_y), show_metric=True,
-          batch_size=128, run_id="lstm_senti_2", n_epoch=30)
+          batch_size=128, run_id="lstm_senti_2", n_epoch=100)
 model.save(model_pkl)
 pickle.dump(dictionary, open(dictionary_pkl, 'wb'), protocol=4)
