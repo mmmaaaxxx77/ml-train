@@ -1,144 +1,27 @@
 from __future__ import division, print_function
 
-import jieba
 import os
 import tflearn
 import json
-import re
+
 import numpy as np
 import tensorflow as tf
-import pickle
 
 
 # -----------------------------------------------------------------------------
 from tensorflow.contrib.legacy_seq2seq.python.ops import seq2seq
 from tensorflow.contrib.rnn import MultiRNNCell, BasicLSTMCell
 from tensorflow.contrib.rnn.python.ops import rnn_cell
-from tflearn import bidirectional_rnn
-
-jieba.load_userdict("senti/dict/dict.txt.big.txt")
-jieba.load_userdict("senti/dict/NameDict_Ch_v2")
-jieba.load_userdict("senti/dict/ntusd-negative.txt")
-jieba.load_userdict("senti/dict/ntusd-positive.txt")
-jieba.load_userdict("senti/dict/鄉民擴充辭典.txt")
-
-dictionary = dict(n=0)
-dictionary_de = dict()
-X = []
-Y = []
-default_term_length = 5
-max_len = 5
-
-comma_tokenizer = lambda x: jieba.cut(x, cut_all=False, HMM=True)
-
-mode_pkl = "senti/model/tfseq2seq.pkl"
-dictionary_pkl = "senti/model/tfseq2seq_dict.pkl"
-
-
-def clear_doc(doc):
-    # 去除網址和符號
-    r2 = r'https://[a-zA-Z0-9.?/&=:]*'
-    r = '[\s！？｡＂＃＄％＆＇（）＊＋，－／：；＜＝＞＠［＼］＾＿｀｛｜｝～｟｠｢｣､、〃》「」『』【】〔〕〖〗〘〙〚〛〜〝〞〟〰〾〿–—‘’‛“”„‟…‧﹏.!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~]+'
-    r3 = r'\n'
-    text = re.sub(r2, '', doc)
-    text = re.sub(r, '', text)
-    # text = re.sub(r3, ' ', text)
-    return text
-
-
-def set_to_dictionary(term):
-    if term in dictionary.keys():
-        return dictionary[term]
-    else:
-        _index = len(dictionary)
-        dictionary[term] = _index
-    return _index
-
-
-def stream_docs(path):
-    x = []
-    y = []
-    with open(path, 'r') as csv:
-        for line in csv:
-            text = clear_doc(line)
-            if len(text) == 0:
-                continue
-            terms = [set_to_dictionary(i) for i in comma_tokenizer(text)]
-            y_part = []
-            for ind in range(0, len(terms)):
-                if ind+1 < len(terms):
-                    y_part.append(terms[ind + 1])
-                else:
-                    y_part.append(0)
-            x.append(terms)
-            y.append(y_part)
-    return x, y
-    # seq_index = np.zeros(len(dictionary), dtype=np.bool)
-
-if not os.path.exists(dictionary_pkl):
-    print("處理資料&字典開始")
-    doc_streams = [stream_docs(path='senti/data/p/positive.txt')]
-        #stream_docs(path='senti/data/n/broken-heart.txt'), stream_docs(path='senti/data/p/adulation.txt'), stream_docs(path='senti/data/p/kindness.txt')]
-    print("處理資料&字典完成")
-else:
-    dictionary = pickle.load(open(dictionary_pkl, 'rb'))
-
-
-def get_docs_labels(doc_streams):
-    #
-    for key, value in dictionary.items():
-        dictionary_de[int(value)] = key
-    #
-    docs, y = [], []
-    for doc_stream in doc_streams:
-        raw_terms, raw_nexts = doc_stream
-        matrix = np.zeros((max_len*2,), dtype=np.int32)
-
-        il = 0
-        while True:
-            for it in range(il, len(raw_terms)):
-                if it >= len(raw_terms):
-                    break
-                count = 0
-                matrix = np.zeros((max_len*2,), dtype=np.int32)
-                for word_index in range(0, len(raw_terms[it])):
-                    if word_index + max_len >= len(raw_terms[it]):
-                        break
-                    word_id = raw_terms[it][word_index]
-                    next_word_id = raw_nexts[it][word_index]
-                    matrix[count] = word_id
-                    count += 1
-                    if count == max_len:
-                        y_m = np.zeros((max_len,), dtype=np.int32)
-                        for w_ind in range(0, max_len):
-                            w_i = word_index + w_ind +1
-                            if w_i >= len(raw_terms[it]):
-                                break
-                            w_id = raw_terms[it][w_i]
-                            y_m[w_ind] = w_id
-                            matrix[w_ind+count] = w_id
-                        y.append(y_m)
-                        docs.append(matrix)
-                        matrix = np.zeros((max_len*2,), dtype=np.int32)
-                        count = 0
-                it += max_len
-            il += 1
-            if il == len(raw_terms):
-                break
-    print("{}, {}".format(len(docs), len(y)))
-    print("{}, {}".format(np.array(docs).shape, np.array(y).shape))
-    return docs, y
 
 
 class SequencePattern(object):
-    INPUT_SEQUENCE_LENGTH = max_len
-    OUTPUT_SEQUENCE_LENGTH = max_len
-    INPUT_MAX_INT = len(dictionary)
-    OUTPUT_MAX_INT = len(dictionary)
+    INPUT_SEQUENCE_LENGTH = 10
+    OUTPUT_SEQUENCE_LENGTH = 10
+    INPUT_MAX_INT = 20
+    OUTPUT_MAX_INT = 20
     PATTERN_NAME = "sorted"
 
     def __init__(self, name=None, in_seq_len=None, out_seq_len=None):
-        print(self.INPUT_MAX_INT)
         if name is not None:
             assert hasattr(self, "%s_sequence" % name)
             self.PATTERN_NAME = name
@@ -217,7 +100,6 @@ class TFLearnSeq2Seq(object):
         xy_data = numpy array of shape [num_points, in_seq_len + out_seq_len], with each point being X + Y
         y_data  = numpy array of shape [num_points, out_seq_len]
         '''
-        """
         x_data = np.random.randint(0, self.in_max_int,
                                    size=(num_points, self.in_seq_len))  # shape [num_points, in_seq_len]
         x_data = x_data.astype(np.uint32)  # ensure integer type
@@ -226,11 +108,6 @@ class TFLearnSeq2Seq(object):
         y_data = np.array(y_data)
 
         xy_data = np.append(x_data, y_data, axis=1)  # shape [num_points, 2*seq_len]
-        """
-        """
-        
-        """
-        xy_data, y_data = get_docs_labels(doc_streams)
         return xy_data, y_data
 
     def sequence_loss(self, y_pred, y_true):
@@ -262,7 +139,7 @@ class TFLearnSeq2Seq(object):
         accuracy = tf.reduce_mean(tf.cast(tf.equal(pred_idx, y_true), tf.float32), name='acc')
         return accuracy
 
-    def model(self, mode="train", num_layers=1, cell_size=512, cell_type="BasicLSTMCell", embedding_size=20,
+    def model(self, mode="train", num_layers=1, cell_size=32, cell_type="BasicLSTMCell", embedding_size=20,
               learning_rate=0.0001,
               tensorboard_verbose=0, checkpoint_path=None):
         '''
@@ -277,6 +154,8 @@ class TFLearnSeq2Seq(object):
         '''
         assert mode in ["train", "predict"]
 
+        checkpoint_path = checkpoint_path or (
+        "%s%ss2s_checkpoint.tfl" % (self.data_dir or "", "/" if self.data_dir else ""))
         GO_VALUE = self.out_max_int + 1  # unique integer value used to trigger decoder outputs in the seq2seq RNN
 
         network = tflearn.input_data(shape=[None, self.in_seq_len + self.out_seq_len], dtype=tf.int32, name="XY")
@@ -358,7 +237,9 @@ class TFLearnSeq2Seq(object):
         Returns logits for prediction, as an numpy array of shape [out_seq_len, n_output_symbols].
         '''
         trainXY, trainY = self.generate_trainig_data(num_points)
-
+        print("[TFLearnSeq2Seq] Training on %d point dataset (pattern '%s'), with %d epochs" % (num_points,
+                                                                                                self.sequence_pattern.PATTERN_NAME,
+                                                                                                num_epochs))
         if self.verbose > 1:
             print("  model parameters: %s" % json.dumps(model_params, indent=4))
         model_params = model_params or {}
@@ -395,7 +276,6 @@ class TFLearnSeq2Seq(object):
         wfn = "ts2s__%s__%s_%s.tfl" % (model_name, self.sequence_pattern.PATTERN_NAME, iteration_num)
         if self.data_dir:
             wfn = "%s/%s" % (self.data_dir, wfn)
-        wfn = "senti/model/test_sql2sq.tfl"
         self.weights_filename = wfn
         return wfn
 
@@ -497,14 +377,12 @@ def test_train1():
     '''
     sp = SequencePattern()
     ts2s = TFLearnSeq2Seq(sp, verbose=2)
-    ofn = ts2s.canonical_weights_fn(0)
+    ofn = "test_%s" % ts2s.canonical_weights_fn(0)
     print("using weights filename %s" % ofn)
     if os.path.exists(ofn):
         os.unlink(ofn)
     tf.reset_default_graph()
     ts2s.train(num_epochs=1, num_points=10000, weights_output_fn=ofn)
-    #assert os.path.exists(ofn)
-    return ts2s
 
 
 def test_predict1():
@@ -512,11 +390,12 @@ def test_predict1():
     Test simple preductions using weights just produced (in test_train1)
     '''
     sp = SequencePattern()
-    ts2s = TFLearnSeq2Seq(sp, verbose=1)
+    ts2s = TFLearnSeq2Seq(sp, verbose=2)
     wfn = "test_%s" % ts2s.canonical_weights_fn(0)
     print("using weights filename %s" % wfn)
     tf.reset_default_graph()
     prediction, y = ts2s.predict(Xin=range(10), weights_input_fn=wfn)
+    print("{},{}".format(prediction, y))
     assert len(prediction == 10)
 
 
@@ -562,34 +441,5 @@ def test_train_predict3():
 
     os.system("rm -rf %s" % tempdir)
 
-
-def translation_to(sentence):
-    terms = comma_tokenizer(sentence)
-    r_list = [0]*max_len
-    term_list = list(terms)
-    for i in range(0, len(term_list)):
-        if i >= max_len:
-            break
-        r_list[i] = dictionary[str(term_list[i])]
-    return r_list
-
-
-def translation_from(seq):
-    sentence = ""
-
-    for id in seq.tolist():
-        sentence += dictionary_de[id]
-
-    return sentence
-
-model = test_train1()
-wfn = "test_%s" % model.canonical_weights_fn(0)
-tf.reset_default_graph()
-prediction, y = model.predict(translation_to("蔡英文總統加油"), weights_input_fn=wfn)
-print(translation_from(prediction))
-
-while True:
-    input_str = input("說說話吧: ")
-    prediction, y = model.predict(translation_to(input_str))
-    print(translation_from(prediction))
-
+#test_train1()
+test_predict1()

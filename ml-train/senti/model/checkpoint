@@ -1,2 +1,2 @@
-model_checkpoint_path: "/Users/johnny/Documents/git/ml-train/ml-train/senti/model/seq2seq.pkl"
-all_model_checkpoint_paths: "/Users/johnny/Documents/git/ml-train/ml-train/senti/model/seq2seq.pkl"
+model_checkpoint_path: "/Users/johnny/Documents/git/ml-train/ml-train/senti/model/test_sql2sq.tfl"
+all_model_checkpoint_paths: "/Users/johnny/Documents/git/ml-train/ml-train/senti/model/test_sql2sq.tfl"
