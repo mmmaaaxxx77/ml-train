@@ -189,6 +189,7 @@ def pre_clear(sentence):
         return None
     count = 0
     sub = [0] * max_length
+    x = []
     for i in range(0, len(terms)):
         try:
             sub[count] = dictionary[str(terms[i])]
@@ -199,16 +200,15 @@ def pre_clear(sentence):
             x.append(sub)
             count = 0
             sub = [0] * max_length
-    return sub
+    return x
 #model.save(model_pkl)
 #pickle.dump(dictionary, open(dictionary_pkl, 'wb'), protocol=4)
 
 model.load(model_pkl)
 dictionary = pickle.load(open(dictionary_pkl, 'rb'))
 
-print(model.predict([pre_clear("從高中以來也認識好多個年頭了 真的很感謝一路相伴的那些好友們 我們永遠都相互扶持彼此打氣 在任何一個流淚的時刻 我知道你們一直在那裏 兩次的心碎都有願意陪在我身邊的人 真的很感謝你們 有你們在 我知道大風大浪都會過去的~~ 當我遇見真正的幸福 你們也會笑著祝福我 感謝你們一直以來的好 希望我們白髮蒼蒼的時候 也能三不五時這樣子聚會聊天玩鬧喔^^ 最愛你們大家了~")]))
+print(model.predict(pre_clear("從高中以來也認識好多個年頭了 真的很感謝一路相伴的那些好友們 我們永遠都相互扶持彼此打氣 在任何一個流淚的時刻 我知道你們一直在那裏 兩次的心碎都有願意陪在我身邊的人 真的很感謝你們 有你們在 我知道大風大浪都會過去的~~ 當我遇見真正的幸福 你們也會笑著祝福我 感謝你們一直以來的好 希望我們白髮蒼蒼的時候 也能三不五時這樣子聚會聊天玩鬧喔^^ 最愛你們大家了~")))
 
 while True:
     input_str = input("說說話吧: ")
-    print(model.predict(
-        [pre_clear(input_str)]))
+    print(model.predict(pre_clear(input_str)))
