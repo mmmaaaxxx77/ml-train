@@ -208,10 +208,10 @@ model.load(model_pkl)
 dictionary = pickle.load(open(dictionary_pkl, 'rb'))
 for seq in pre_clear("從高中以來也認識好多個年頭了 真的很感謝一路相伴的那些好友們 我們永遠都相互扶持彼此打氣 在任何一個流淚的時刻 我知道你們一直在那裏 兩次的心碎都有願意陪在我身邊的人 真的很感謝你們 有你們在 我知道大風大浪都會過去的~~ 當我遇見真正的幸福 你們也會笑著祝福我 感謝你們一直以來的好 希望我們白髮蒼蒼的時候 也能三不五時這樣子聚會聊天玩鬧喔^^ 最愛你們大家了~"):
     test_result = model.predict([seq])
-    print(np.asarray(test_result, dtype=np.float32))
+    print([abs(a) for a in test_result])
 
 while True:
     input_str = input("說說話吧: ")
     for seq in pre_clear(input_str):
         result = model.predict([seq])
-        print(np.asarray(result, dtype=np.float32))
+        print([abs(a) for a in result])
