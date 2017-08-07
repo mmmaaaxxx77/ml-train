@@ -217,7 +217,7 @@ for seq in pre_clear("從高中以來也認識好多個年頭了 真的很感謝
 print(Counter(np.argmax(res_list, axis=1).tolist()))
 
 print("訓練SGD ...")
-train_file = ""
+train_file = "data/all.txt"
 sgd_max_length = 30
 
 
