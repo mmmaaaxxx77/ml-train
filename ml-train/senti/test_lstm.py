@@ -1,5 +1,6 @@
 import json
 import pickle
+from statistics import mode
 
 import jieba
 import numpy as np
@@ -8,6 +9,7 @@ import re
 import tflearn
 from collections import Counter
 from gensim.models import word2vec
+from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import train_test_split
 from tflearn import embedding, bidirectional_rnn, BasicLSTMCell
 from tflearn.data_utils import pad_sequences, to_categorical
@@ -214,11 +216,50 @@ for seq in pre_clear("從高中以來也認識好多個年頭了 真的很感謝
     print([a for a in test_result.tolist()[0]])
 print(Counter(np.argmax(res_list, axis=1).tolist()))
 
+print("訓練SGD ...")
+train_file = ""
+sgd_max_length = 30
+
+
+def sgd_pre_clear(sentence):
+    predict_results = (model.predict([seq])).tolist()[0]
+    count = 0
+    sub_x = [0] * sgd_max_length
+    for predict_result in predict_results:
+        if count == sgd_max_length:
+            train_x.append(sub_x)
+            train_y.append(mode[sub_x])
+            break
+
+        sub_x[count] = 1 if predict_result[0] < predict_result[1] else 0
+
+        count += 1
+
+    return sub_x, mode[sub_x]
+
+with open(train_file, 'r') as csv:
+    train_x, train_y = [], []
+    for line in csv:
+        for seq in pre_clear(line):
+
+            sub_x, y_label = sgd_pre_clear(seq)
+            train_x.append(sub_x)
+            train_y.append(y_label)
+
+    clf = SGDClassifier()
+    clf.fit(train_x, train_y)
+
+print("訓練SGD end ...")
+
 while True:
     input_str = input("說說話吧: ")
     res_list = []
     for seq in pre_clear(input_str):
+        """
         result = model.predict([seq])
         res_list.append(result.tolist()[0])
         print([a for a in result.tolist()[0]])
+        """
+        result = clf.predict(sgd_pre_clear(seq))
+        print(result)
     print(Counter(np.argmax(res_list, axis=1).tolist()))
