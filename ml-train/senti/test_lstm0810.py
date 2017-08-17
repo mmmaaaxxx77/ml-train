@@ -100,7 +100,7 @@ def stream_docs(path, label):
         lines_count = sum(1 for _ in file)
 
     print("{}, {}".format(lines_count, path))
-    
+
     with open(path, 'r') as file:
         pbar = pyprind.ProgBar(lines_count)
         for line in file:
