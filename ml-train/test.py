@@ -1,4 +1,5 @@
 import numpy as np
+import random
 from sklearn import manifold
 
 x = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
@@ -20,3 +21,7 @@ y_data = np.array([[7,8,9],[10,11,12]])
 print(np.append(x_data, y_data, axis=1))
 
 print(np.argmax(x_data, axis=1).tolist())
+
+li = [a for a in range(20)]
+random.shuffle(li)
+print(li)

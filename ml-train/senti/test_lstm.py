@@ -162,7 +162,7 @@ print("訓練集切割完成")
 
 # Network building
 net = tflearn.input_data(shape=[None, max_length])
-net = embedding(net, input_dim=len(dictionary), output_dim=1024)
+#net = embedding(net, input_dim=len(dictionary), output_dim=1024)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
 net = tflearn.dropout(net, 0.5)
 net = tflearn.fully_connected(net, 2, activation='softmax')

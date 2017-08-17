@@ -113,6 +113,9 @@ def stream_docs(path, label):
                     y.append(label)
                     count = 0
                     sub = np.zeros((max_length,), dtype=np.int)
+                elif i == idterms.size:
+                    x.append(sub)
+                    y.append(label)
     return x, y
 
 
