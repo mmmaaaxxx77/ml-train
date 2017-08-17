@@ -226,8 +226,8 @@ sgd_model_pkl = "model/sgd2.pkl"
 def sgd_pre_clear(line):
     sub_x = [0] * sgd_max_length
     count = 0
-    if len(pre_clear(line)) < sgd_max_length:
-        return None, None
+    #if len(pre_clear(line)) < sgd_max_length:
+    #    return None, None
     for seq in pre_clear(line):
         predict_result = model.predict([seq])[0]
         if count == sgd_max_length:
