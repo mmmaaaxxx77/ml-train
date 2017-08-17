@@ -5,6 +5,7 @@ from statistics import mode
 import jieba
 import numpy as np
 import os
+import random
 import re
 import tflearn
 import time
@@ -207,8 +208,9 @@ print(Counter(np.argmax(res_list, axis=1).tolist()))
 
 
 print("訓練SGD ...")
-train_file = "data/all.txt"
-sgd_max_length = 3
+n_train_file = "data/n/train_n.txt"
+p_train_file = "data/p/train_p.txt"
+sgd_max_length = 100
 sgd_model_pkl = "model/sgd2.pkl"
 
 
@@ -227,20 +229,31 @@ def sgd_pre_clear(line):
 
 clf = None
 if training:
-    with open(train_file, 'r') as csv:
-        train_x, train_y = [], []
+    train_x, train_y = [], []
+    with open(n_train_file, 'r') as csv:
         for line in csv:
             sub_x, y_label = sgd_pre_clear(line)
             if sub_x is not None:
                 train_x.append(sub_x)
-                train_y.append(y_label)
-        print("訓練SGD前處理完成")
-        #train_y = to_categorical(train_y, nb_classes=2)
-        #print("{}, {}".format(np.asarray(train_x).shape, train_y))
-        clf = SGDClassifier()
-        clf.fit(train_x, train_y)
+                train_y.append(0)
+    with open(p_train_file, 'r') as csv:
+        for line in csv:
+            sub_x, y_label = sgd_pre_clear(line)
+            if sub_x is not None:
+                train_x.append(sub_x)
+                train_y.append(1)
 
-        joblib.dump(clf, sgd_model_pkl)
+    c = list(zip(train_x, train_y))
+    random.shuffle(c)
+    train_x, train_y = zip(*c)
+
+    print("訓練SGD前處理完成")
+    #train_y = to_categorical(train_y, nb_classes=2)
+    #print("{}, {}".format(np.asarray(train_x).shape, train_y))
+    clf = SGDClassifier()
+    clf.fit(train_x, train_y)
+
+    joblib.dump(clf, sgd_model_pkl)
     print("訓練SGD end ...")
 else:
     clf = joblib.load(sgd_model_pkl)
@@ -252,3 +265,4 @@ while True:
     if sub_x is not None:
         result = clf.predict([sub_x])
         print(result)
+        print("[{}, {}]".format(clf.score([sub_x], [0]), clf.score([sub_x], [1])))
