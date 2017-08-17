@@ -169,7 +169,7 @@ model = tflearn.DNN(net, tensorboard_verbose=0, tensorboard_dir="log/")
 
 if training:
     model.fit(x_train, y_train, validation_set=0.2, show_metric=True,
-              batch_size=128, run_id="lstm_senti_2t2", n_epoch=50)
+              batch_size=512, run_id="lstm_senti_2t23", n_epoch=1)
 
 
 def pre_clear(sentence):
@@ -210,7 +210,7 @@ print(Counter(np.argmax(res_list, axis=1).tolist()))
 print("訓練SGD ...")
 train_file = "data/all.txt"
 sgd_max_length = 3
-sgd_model_pkl = "model/sgd.pkl"
+sgd_model_pkl = "model/sgd2.pkl"
 
 
 def sgd_pre_clear(line):
