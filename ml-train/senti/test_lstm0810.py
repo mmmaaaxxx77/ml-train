@@ -92,14 +92,15 @@ def transform_term_to_id(sentence):
 
 
 def stream_docs(path, label):
-    print(path)
     x = []
     y = []
-    
+
     lines_count = 0
     with open(path, 'r') as file:
         lines_count = sum(1 for _ in file)
 
+    print("{}, {}".format(lines_count, path))
+    
     with open(path, 'r') as file:
         pbar = pyprind.ProgBar(lines_count)
         for line in file:
