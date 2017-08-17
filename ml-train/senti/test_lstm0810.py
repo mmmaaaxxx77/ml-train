@@ -160,16 +160,26 @@ if training:
 
 # Network building
 net = tflearn.input_data(shape=[None, max_length])
-net = embedding(net, input_dim=dictionary_length, output_dim=2048)
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512), return_seq=True)
+net = embedding(net, input_dim=dictionary_length, output_dim=4096)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512), return_seq=True)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512), return_seq=True)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512), return_seq=True)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512))
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
+net = tflearn.dropout(net, 0.5)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
+net = tflearn.dropout(net, 0.5)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
+net = tflearn.dropout(net, 0.5)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
+net = tflearn.dropout(net, 0.5)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
+net = tflearn.dropout(net, 0.5)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
 net = tflearn.dropout(net, 0.5)
 net = tflearn.fully_connected(net, 2, activation='softmax')
 net = tflearn.regression(net, optimizer='adam', learning_rate=0.001,
@@ -186,7 +196,7 @@ model = tflearn.DNN(net, tensorboard_verbose=0, tensorboard_dir="log/")
 
 if training:
     model.fit(x_train, y_train, validation_set=0.2, show_metric=True,
-              batch_size=128, run_id="lstm_senti_2t23", n_epoch=10)
+              batch_size=128, run_id="lstm_senti_2t23", n_epoch=100)
 
 
 def pre_clear(sentence):
