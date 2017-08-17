@@ -92,6 +92,7 @@ def transform_term_to_id(sentence):
 
 
 def stream_docs(path, label):
+    print(path)
     x = []
     y = []
     with open(path, 'r') as csv:
