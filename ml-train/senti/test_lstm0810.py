@@ -160,9 +160,13 @@ if training:
 
 # Network building
 net = tflearn.input_data(shape=[None, max_length])
-net = embedding(net, input_dim=dictionary_length, output_dim=4096)
-#net = tflearn.lstm(net, 512, return_seq=True)
-#net = tflearn.dropout(net, 0.5)
+net = embedding(net, input_dim=dictionary_length, output_dim=2048)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
+net = tflearn.dropout(net, 0.5)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
+net = tflearn.dropout(net, 0.5)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
+net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
@@ -265,7 +269,7 @@ if training:
     print("訓練SGD前處理完成")
     #train_y = to_categorical(train_y, nb_classes=2)
     #print("{}, {}".format(np.asarray(train_x).shape, train_y))
-    clf = SGDClassifier(loss="log")
+    clf = SGDClassifier(loss="modified_huber")
     clf.fit(train_x, train_y)
 
     joblib.dump(clf, sgd_model_pkl)
