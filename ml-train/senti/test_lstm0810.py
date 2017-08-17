@@ -261,7 +261,7 @@ if training:
     print("訓練SGD前處理完成")
     #train_y = to_categorical(train_y, nb_classes=2)
     #print("{}, {}".format(np.asarray(train_x).shape, train_y))
-    clf = SGDClassifier()
+    clf = SGDClassifier(loss="log")
     clf.fit(train_x, train_y)
 
     joblib.dump(clf, sgd_model_pkl)
