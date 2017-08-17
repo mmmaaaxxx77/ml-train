@@ -136,8 +136,7 @@ if training:
 
     print_time()
     print("讀取&處理資料集")
-    doc_streams = [stream_docs(path='data/n/twneg.txt', label=0), stream_docs(path='data/p/twpos.txt', label=1)]
-                   #stream_docs(path='data/p/kindness.txt', label=1)]
+    doc_streams = [stream_docs(path='data/n/train_n.txt', label=0), stream_docs(path='data/p/train_p.txt', label=1)]
     #test_doc_streams = [stream_docs(path='data/p/kindness.txt', label=1), stream_docs(path='data/n/negative.txt', label=0)]
     print_time()
     print("整理XY開始")
