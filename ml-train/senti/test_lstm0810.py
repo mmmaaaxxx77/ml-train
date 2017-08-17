@@ -95,8 +95,13 @@ def stream_docs(path, label):
     print(path)
     x = []
     y = []
+    
+    lines_count = 0
     with open(path, 'r') as file:
-        pbar = pyprind.ProgBar(sum(1 for _ in file))
+        lines_count = sum(1 for _ in file)
+
+    with open(path, 'r') as file:
+        pbar = pyprind.ProgBar(lines_count)
         for line in file:
             pbar.update()
             text = clear_doc(line)
