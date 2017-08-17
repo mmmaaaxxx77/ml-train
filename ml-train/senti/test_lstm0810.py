@@ -178,7 +178,7 @@ model = tflearn.DNN(net, tensorboard_verbose=0, tensorboard_dir="log/")
 
 if training:
     model.fit(x_train, y_train, validation_set=0.2, show_metric=True,
-              batch_size=128, run_id="lstm_senti_2t23", n_epoch=1)
+              batch_size=128, run_id="lstm_senti_2t23", n_epoch=10)
 
 
 def pre_clear(sentence):
