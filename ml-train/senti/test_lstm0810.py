@@ -1,7 +1,7 @@
 import json
 import pickle
 from statistics import mode
-
+import pyprind
 import jieba
 import numpy as np
 import os
@@ -96,7 +96,9 @@ def stream_docs(path, label):
     x = []
     y = []
     with open(path, 'r') as csv:
+        pbar = pyprind.ProgBar(len(csv))
         for line in csv:
+            pbar.update()
             text = clear_doc(line)
             if len(text) == 0:
                 continue
