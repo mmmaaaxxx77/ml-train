@@ -95,9 +95,9 @@ def stream_docs(path, label):
     print(path)
     x = []
     y = []
-    with open(path, 'r') as csv:
-        pbar = pyprind.ProgBar(len(csv))
-        for line in csv:
+    with open(path, 'r') as file:
+        pbar = pyprind.ProgBar(sum(1 for _ in file))
+        for line in file:
             pbar.update()
             text = clear_doc(line)
             if len(text) == 0:
