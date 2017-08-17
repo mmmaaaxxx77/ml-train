@@ -178,7 +178,7 @@ model = tflearn.DNN(net, tensorboard_verbose=0, tensorboard_dir="log/")
 
 if training:
     model.fit(x_train, y_train, validation_set=0.2, show_metric=True,
-              batch_size=512, run_id="lstm_senti_2t23", n_epoch=1)
+              batch_size=128, run_id="lstm_senti_2t23", n_epoch=1)
 
 
 def pre_clear(sentence):
@@ -251,6 +251,8 @@ if training:
             if sub_x is not None:
                 train_x.append(sub_x)
                 train_y.append(1)
+
+    print("{}, {}".format(np.asarray(train_x).shape, np.asarray(train_y).shape))
 
     c = list(zip(train_x, train_y))
     random.shuffle(c)

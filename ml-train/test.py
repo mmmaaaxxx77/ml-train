@@ -25,3 +25,18 @@ print(np.argmax(x_data, axis=1).tolist())
 li = [a for a in range(20)]
 random.shuffle(li)
 print(li)
+
+
+import random
+
+a = ['a', 'b', 'c']
+b = [1, 2, 3]
+
+c = list(zip(a, b))
+
+random.shuffle(c)
+
+a, b = zip(*c)
+
+print(a)
+print(b)
