@@ -79,6 +79,9 @@ def gen_train_data(doc_streams, path):
             x.append(sentence)
     random.shuffle(x)
 
+    if os.path.exists(path):
+        os.remove(path)
+
     with open(path, 'a') as file:
         for sentence in x[0:total]:
             file.write(sentence)
