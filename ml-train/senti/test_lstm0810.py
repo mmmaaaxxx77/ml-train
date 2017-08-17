@@ -265,6 +265,8 @@ if training:
     clf.fit(train_x, train_y)
 
     joblib.dump(clf, sgd_model_pkl)
+
+    print(clf.score(train_x, train_y))
     print("訓練SGD end ...")
 else:
     clf = joblib.load(sgd_model_pkl)
@@ -275,5 +277,6 @@ while True:
     sub_x, y_label = sgd_pre_clear(input_str)
     if sub_x is not None:
         result = clf.predict([sub_x])
+        result_proba = clf.predict_proba([sub_x])
         print(result)
-        print("[{}, {}]".format(clf.score([sub_x], [0]), clf.score([sub_x], [1])))
+        print(result_proba)
