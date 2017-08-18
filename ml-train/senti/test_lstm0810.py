@@ -210,7 +210,7 @@ class EarlyStoppingCallback(tflearn.callbacks.Callback):
 if training:
     early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.82)
     model.fit(x_train, y_train, validation_set=0.2, show_metric=True,
-              batch_size=128, run_id="lstm_senti_2t233", n_epoch=100)
+              batch_size=128, run_id="lstm_senti_2t233", n_epoch=50)
 
 
 def pre_clear(sentence):
