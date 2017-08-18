@@ -194,7 +194,21 @@ if training:
     print("{}, {}".format(np.array(x_train).shape, np.array(y_train).shape))
 model = tflearn.DNN(net, tensorboard_verbose=0, tensorboard_dir="log/")
 
+
+class EarlyStoppingCallback(tflearn.callbacks.Callback):
+    def __init__(self, val_acc_thresh):
+        """ Note: We are free to define our init function however we please. """
+        self.val_acc_thresh = val_acc_thresh
+
+    def on_epoch_end(self, training_state):
+        """ """
+        # Apparently this can happen.
+        if training_state.val_acc is None: return
+        if training_state.val_acc > self.val_acc_thresh:
+            raise StopIteration
+
 if training:
+    early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.82)
     model.fit(x_train, y_train, validation_set=0.2, show_metric=True,
               batch_size=128, run_id="lstm_senti_2t23", n_epoch=100)
 
