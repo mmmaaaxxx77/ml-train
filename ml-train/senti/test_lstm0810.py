@@ -140,7 +140,7 @@ def get_docs_labels(doc_streams):
             print("ERROR")
     return docs, y
 
-training = True
+training = False
 
 if training:
 
@@ -162,26 +162,34 @@ if training:
 net = tflearn.input_data(shape=[None, max_length])
 net = embedding(net, input_dim=dictionary_length, output_dim=4096)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
+
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
+
+#
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.1)
 net = tflearn.fully_connected(net, 2, activation='softmax')
+#
+#net = tflearn.time_distributed(net, tflearn.fully_connected, [4096])
+#net = tflearn.softmax(net)
+#net = tflearn.reshape(net, [None, max_length, 4096])
+#
 net = tflearn.regression(net, optimizer='adam', learning_rate=0.001,
                          loss='categorical_crossentropy')
 print("網路定義完成")
