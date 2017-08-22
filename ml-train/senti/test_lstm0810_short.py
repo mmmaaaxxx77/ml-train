@@ -161,14 +161,12 @@ if training:
 # Network building
 net = tflearn.input_data(shape=[None, max_length])
 net = embedding(net, input_dim=dictionary_length, output_dim=2046)
-"""
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.8)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
+net = tflearn.dropout(net, 0.8)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
-"""
+net = tflearn.dropout(net, 0.8)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.8)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
