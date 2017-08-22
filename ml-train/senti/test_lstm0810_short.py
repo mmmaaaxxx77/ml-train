@@ -65,12 +65,12 @@ print("讀取情緒字詞")
 comma_tokenizer = lambda x: jieba.cut(x, cut_all=False, HMM=True)
 #comma_tokenizer = lambda x: [y for y in x]
 
-max_length = 10
+max_length = 5
 
 dictionary_length = 2**15
 vect = FeatureHasher(n_features=dictionary_length, non_negative=True)
 
-model_pkl = "model/mode_senti3_model.pkl"
+model_pkl = "model/mode_senti_short.pkl"
 
 
 def clear_doc(doc):
@@ -146,7 +146,7 @@ if training:
 
     print_time()
     print("讀取&處理資料集")
-    doc_streams = [stream_docs(path='data/n/train_n2.txt', label=0), stream_docs(path='data/p/train_p2.txt', label=1)]
+    doc_streams = [stream_docs(path='data/n/jasmine_n.txt', label=0), stream_docs(path='data/p/jasmine_p.txt', label=1)]
     #test_doc_streams = [stream_docs(path='data/p/kindness.txt', label=1), stream_docs(path='data/n/negative.txt', label=0)]
     print_time()
     print("整理XY開始")
@@ -168,11 +168,11 @@ net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=
 net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
 """
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512), dynamic=True)
-net = tflearn.dropout(net, 0.5)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
+net = tflearn.dropout(net, 0.8)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
+net = tflearn.dropout(net, 0.8)
 net = tflearn.fully_connected(net, 2, activation='softmax')
 net = tflearn.regression(net, optimizer='adam', learning_rate=0.001,
                          loss='categorical_crossentropy')
@@ -208,6 +208,11 @@ if training:
         print("{}".format(e))
         print("stop")
 
+if training:
+    model.save(model_pkl)
+else:
+    model.load(model_pkl)
+
 
 def pre_clear(sentence):
     x = []
@@ -230,13 +235,8 @@ def pre_clear(sentence):
             sub = np.zeros((max_length,), dtype=np.int)
     return x
 
-if training:
-    model.save(model_pkl)
-else:
-    model.load(model_pkl)
-
 res_list = []
-for seq in pre_clear("從高中以來也認識好多個年頭了 真的很感謝一路相伴的那些好友們 我們永遠都相互扶持彼此打氣 在任何一個流淚的時刻 我知道你們一直在那裏 兩次的心碎都有願意陪在我身邊的人 真的很感謝你們 有你們在 我知道大風大浪都會過去的~~ 當我遇見真正的幸福 你們也會笑著祝福我 感謝你們一直以來的好 希望我們白髮蒼蒼的時候 也能三不五時這樣子聚會聊天玩鬧喔^^ 最愛你們大家了~"):
+for seq in pre_clear("房間很不錯，到底是在比較偏僻的九龍城，所以房間就是比市區裏面的大上好多。"):
     test_result = model.predict([seq])
     #print(test_result)
     res_list.append(test_result[0])
@@ -245,10 +245,10 @@ print(Counter(np.argmax(res_list, axis=1).tolist()))
 
 
 print("訓練SGD ...")
-n_train_file = "data/n/train_n2.txt"
-p_train_file = "data/p/train_p2.txt"
-sgd_max_length = 100
-sgd_model_pkl = "model/sgd2.pkl"
+n_train_file = "data/n/jasmine_n.txt"
+p_train_file = "data/p/jasmine_p.txt"
+sgd_max_length = 6
+sgd_model_pkl = "model/sgd_short.pkl"
 
 
 def sgd_pre_clear(line):
@@ -262,7 +262,7 @@ def sgd_pre_clear(line):
             break
         sub_x[count] = 1 if predict_result[0] < predict_result[1] else 0
         count += 1
-    return sub_x, mode(sub_x)
+    return sub_x, None
 
 clf = None
 if training:

@@ -34,7 +34,7 @@ n_file = ""
 p_file = ""
 valve = 30
 
-total = 11000
+total = 50
 
 
 def clear_doc(doc):
@@ -89,7 +89,7 @@ def gen_train_data(doc_streams, path):
     print("量: {}, {}".format(count, path))
 
 print("開始建立")
-gen_train_data(doc_streams_n, "data/n/train_n.txt")
+gen_train_data(doc_streams_n, "data/n/train_n2.txt")
 print("n 建立完成")
-gen_train_data(doc_streams_p, "data/p/train_p.txt")
+gen_train_data(doc_streams_p, "data/p/train_p2.txt")
 print("p 建立完成")
