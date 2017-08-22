@@ -140,7 +140,7 @@ def get_docs_labels(doc_streams):
             print("ERROR")
     return docs, y
 
-training = False
+training = True
 
 if training:
 
@@ -164,16 +164,6 @@ net = embedding(net, input_dim=dictionary_length, output_dim=4096)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
 
-net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
-net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
-net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
