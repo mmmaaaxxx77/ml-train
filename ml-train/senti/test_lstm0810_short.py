@@ -140,7 +140,7 @@ def get_docs_labels(doc_streams):
             print("ERROR")
     return docs, y
 
-training = True
+training = False
 
 if training:
 
@@ -197,7 +197,7 @@ class EarlyStoppingCallback(tflearn.callbacks.Callback):
         if training_state.val_acc > self.val_acc_thresh:
             raise StopIteration
 
-if not training:
+if training:
     early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.82)
     try:
         model.fit(x_train, y_train, validation_set=0.2, show_metric=True,
@@ -206,7 +206,7 @@ if not training:
         print("{}".format(e))
         print("stop")
 
-if not training:
+if training:
     model.save(model_pkl)
 else:
     model.load(model_pkl)

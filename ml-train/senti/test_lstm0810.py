@@ -146,7 +146,7 @@ if training:
 
     print_time()
     print("讀取&處理資料集")
-    doc_streams = [stream_docs(path='data/n/train_n2.txt', label=0), stream_docs(path='data/p/train_p2.txt', label=1)]
+    doc_streams = [stream_docs(path='data/n/train_n.txt', label=0), stream_docs(path='data/p/train_p.txt', label=1)]
     #test_doc_streams = [stream_docs(path='data/p/kindness.txt', label=1), stream_docs(path='data/n/negative.txt', label=0)]
     print_time()
     print("整理XY開始")
@@ -160,8 +160,7 @@ if training:
 
 # Network building
 net = tflearn.input_data(shape=[None, max_length])
-net = embedding(net, input_dim=dictionary_length, output_dim=2046)
-"""
+net = embedding(net, input_dim=dictionary_length, output_dim=1024)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
@@ -170,8 +169,7 @@ net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=
 net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
-"""
-net = bidirectional_rnn(net, BasicLSTMCell(512), BasicLSTMCell(512), dynamic=True)
+net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128))
 net = tflearn.dropout(net, 0.5)
 net = tflearn.fully_connected(net, 2, activation='softmax')
 net = tflearn.regression(net, optimizer='adam', learning_rate=0.001,
@@ -245,8 +243,8 @@ print(Counter(np.argmax(res_list, axis=1).tolist()))
 
 
 print("訓練SGD ...")
-n_train_file = "data/n/train_n2.txt"
-p_train_file = "data/p/train_p2.txt"
+n_train_file = "data/n/train_n.txt"
+p_train_file = "data/p/train_p.txt"
 sgd_max_length = 100
 sgd_model_pkl = "model/sgd2.pkl"
 
@@ -274,14 +272,26 @@ def sgd_pre_clear(line):
 clf = None
 if training:
     train_x, train_y = [], []
+
+    lines_count = 0
+    with open(n_train_file, 'r') as file:
+        lines_count = sum(1 for _ in file)
+    pbar = pyprind.ProgBar(lines_count)
     with open(n_train_file, 'r') as csv:
         for line in csv:
+            pbar.update()
             sub_x, y_label = sgd_pre_clear(line)
             if sub_x is not None:
                 train_x.append(sub_x)
                 train_y.append(0)
+
+    lines_count = 0
+    with open(p_train_file, 'r') as file:
+        lines_count = sum(1 for _ in file)
+    pbar = pyprind.ProgBar(lines_count)
     with open(p_train_file, 'r') as csv:
         for line in csv:
+            pbar.update()
             sub_x, y_label = sgd_pre_clear(line)
             if sub_x is not None:
                 train_x.append(sub_x)

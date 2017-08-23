@@ -96,4 +96,4 @@ with open(positive_file, 'a') as file:
     for sentence in positive_list[0:file_cppunt]:
         file.write(sentence+"\n")
 
-print(client.find({"long_text": False, "marked": False})[6])
+print(client.find({"long_text": False, "marked": False})[51])
