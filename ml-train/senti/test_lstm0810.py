@@ -160,7 +160,7 @@ if training:
 
 # Network building
 net = tflearn.input_data(shape=[None, max_length])
-net = embedding(net, input_dim=dictionary_length, output_dim=1024)
+net = embedding(net, input_dim=dictionary_length, output_dim=512)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
 net = tflearn.dropout(net, 0.5)
 net = bidirectional_rnn(net, BasicLSTMCell(128), BasicLSTMCell(128), return_seq=True)
@@ -198,10 +198,10 @@ class EarlyStoppingCallback(tflearn.callbacks.Callback):
             raise StopIteration
 
 if training:
-    early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.90)
+    early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.85)
     try:
         model.fit(x_train, y_train, validation_set=0.2, show_metric=True,
-                  batch_size=128, run_id="lstm_senti_2t233", n_epoch=50, callbacks=early_stopping_cb)
+                  batch_size=512, run_id="lstm_senti_2t233", n_epoch=50, callbacks=early_stopping_cb)
     except Exception as e:
         print("{}".format(e))
         print("stop")
