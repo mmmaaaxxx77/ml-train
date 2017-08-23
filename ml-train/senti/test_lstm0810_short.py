@@ -290,6 +290,7 @@ if training:
         lines_count = sum(1 for _ in file)
     pbar = pyprind.ProgBar(lines_count)
 
+
     with open(p_train_file, 'r') as csv:
         for line in csv:
             pbar.update()
