@@ -266,7 +266,6 @@ def sgd_pre_clear(line):
             label = 0
         sub_x[count] = label
         count += 1
-        print(predict_result)
     return sub_x, None
 
 clf = None
