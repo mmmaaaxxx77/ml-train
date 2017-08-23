@@ -247,6 +247,7 @@ n_train_file = "data/n/jasmine_n.txt"
 p_train_file = "data/p/jasmine_p.txt"
 sgd_max_length = 6
 sgd_model_pkl = "model/sgd_short.pkl"
+threadhold = 0.7
 
 
 def sgd_pre_clear(line):
@@ -258,8 +259,14 @@ def sgd_pre_clear(line):
         predict_result = model.predict([seq])[0]
         if count == sgd_max_length:
             break
-        sub_x[count] = 1 if predict_result[0] < predict_result[1] else 0
+        label = 3
+        if predict_result[0] < predict_result[1] and threadhold <= predict_result[1]:
+            label = 1
+        elif predict_result[0] > predict_result[1] and threadhold <= predict_result[0]:
+            label = 0
+        sub_x[count] = label
         count += 1
+        print(predict_result)
     return sub_x, None
 
 clf = None
