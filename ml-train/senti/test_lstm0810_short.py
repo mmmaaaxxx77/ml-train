@@ -271,14 +271,28 @@ def sgd_pre_clear(line):
 clf = None
 if training:
     train_x, train_y = [], []
+
+    lines_count = 0
+    with open(n_train_file, 'r') as file:
+        lines_count = sum(1 for _ in file)
+    pbar = pyprind.ProgBar(lines_count)
+
     with open(n_train_file, 'r') as csv:
         for line in csv:
+            pbar.update()
             sub_x, y_label = sgd_pre_clear(line)
             if sub_x is not None:
                 train_x.append(sub_x)
                 train_y.append(0)
+
+    lines_count = 0
+    with open(n_train_file, 'r') as file:
+        lines_count = sum(1 for _ in file)
+    pbar = pyprind.ProgBar(lines_count)
+
     with open(p_train_file, 'r') as csv:
         for line in csv:
+            pbar.update()
             sub_x, y_label = sgd_pre_clear(line)
             if sub_x is not None:
                 train_x.append(sub_x)
