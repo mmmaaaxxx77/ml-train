@@ -197,7 +197,7 @@ class EarlyStoppingCallback(tflearn.callbacks.Callback):
         if training_state.val_acc > self.val_acc_thresh:
             raise StopIteration
 
-if training:
+if not training:
     early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.82)
     try:
         model.fit(x_train, y_train, validation_set=0.2, show_metric=True,
@@ -206,7 +206,7 @@ if training:
         print("{}".format(e))
         print("stop")
 
-if training:
+if not training:
     model.save(model_pkl)
 else:
     model.load(model_pkl)
@@ -301,6 +301,7 @@ while True:
     input_str = input("說說話吧: ")
     seqs = []
     sub_x, y_label = sgd_pre_clear(input_str)
+    print(sub_x)
     if sub_x is not None:
         result = clf.predict([sub_x])
         result_proba = clf.predict_proba([sub_x])

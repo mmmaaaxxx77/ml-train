@@ -250,9 +250,11 @@ p_train_file = "data/p/train_p2.txt"
 sgd_max_length = 100
 sgd_model_pkl = "model/sgd2.pkl"
 
+threadhold = 0.7
+
 
 def sgd_pre_clear(line):
-    sub_x = [0] * sgd_max_length
+    sub_x = [3] * sgd_max_length
     count = 0
     #if len(pre_clear(line)) < sgd_max_length:
     #    return None, None
@@ -260,7 +262,12 @@ def sgd_pre_clear(line):
         predict_result = model.predict([seq])[0]
         if count == sgd_max_length:
             break
-        sub_x[count] = 1 if predict_result[0] < predict_result[1] else 0
+        label = 3
+        if predict_result[0] < predict_result[1] and threadhold <= predict_result[1]:
+            label = 1
+        elif predict_result[0] > predict_result[1] and threadhold <= predict_result[0]:
+            label = 0
+        sub_x[count] = label
         count += 1
     return sub_x, mode(sub_x)
 
