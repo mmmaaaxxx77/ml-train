@@ -40,3 +40,8 @@ a, b = zip(*c)
 
 print(a)
 print(b)
+
+print("----")
+x = np.array([[1,2,3],
+              [3,4,5]])
+print(np.expand_dims(x, axis=0))
