@@ -42,6 +42,17 @@ print(a)
 print(b)
 
 print("----")
-x = np.array([[1,2,3],
-              [3,4,5]])
+x = np.array([
+    [
+        [0],
+        [0],
+        [0]
+    ],
+    [
+        [1],
+        [1],
+        [1]
+    ]
+],
+             )
 print(np.expand_dims(x, axis=0))

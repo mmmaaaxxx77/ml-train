@@ -253,7 +253,7 @@ class SentimentClassifier:
         branch3 = tflearn.conv_1d(net, 128, (4, 2), padding='valid', activation='relu', regularizer="L2")
         #branch4 = tflearn.avg_pool_1d(net, kernel_size=(4, 2), strides=1)
         #branch4 = tflearn.conv_1d(branch4, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
-        net = tflearn.merge([branch1, branch2, branch3], mode='concat', axis=0)
+        net = tflearn.merge([branch1, branch2, branch3], mode='concat', axis=1)
 
         for n in range(1, self.n_layer):
             net = bidirectional_rnn(
@@ -317,8 +317,11 @@ class SentimentClassifier:
     def go_deep(self):
         if self.TRAINING:
             # SENTI
-            senti_model = self.train_senti(self.SENTI_MODEL_PATH)
-            self.SENTI_MODEL = senti_model
+            #senti_model = self.train_senti(self.SENTI_MODEL_PATH)
+            #self.SENTI_MODEL = senti_model
+            # SENTI
+            self.SENTI_MODEL = self.get_senti_model()
+            self.SENTI_MODEL.load(self.SENTI_MODEL_PATH)
 
             # SEQ
             seq_model = self.train_seq(self.SEQ_MODEL_PATH)
