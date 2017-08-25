@@ -317,11 +317,11 @@ class SentimentClassifier:
     def go_deep(self):
         if self.TRAINING:
             # SENTI
-            #senti_model = self.train_senti(self.SENTI_MODEL_PATH)
-            #self.SENTI_MODEL = senti_model
+            senti_model = self.train_senti(self.SENTI_MODEL_PATH)
+            self.SENTI_MODEL = senti_model
             # SENTI
-            self.SENTI_MODEL = self.get_senti_model()
-            self.SENTI_MODEL.load(self.SENTI_MODEL_PATH)
+            #self.SENTI_MODEL = self.get_senti_model()
+            #self.SENTI_MODEL.load(self.SENTI_MODEL_PATH)
 
             # SEQ
             seq_model = self.train_seq(self.SEQ_MODEL_PATH)
