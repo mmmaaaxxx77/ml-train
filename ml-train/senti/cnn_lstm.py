@@ -60,7 +60,7 @@ class EarlyStoppingCallback(tflearn.callbacks.Callback):
 
 class SentimentClassifier:
 
-    TRAINING = True
+    TRAINING = False
 
     TF_MODEL_PATH = "model/20170823_cnn_lstm_tf"
     SGD_MODEL_PATH = "model/20170823_cnn_lstm_sgd"

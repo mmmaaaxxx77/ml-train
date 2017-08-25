@@ -1,2 +1,2 @@
-model_checkpoint_path: "/Users/johnny/Documents/git/ml-train/ml-train/senti/model/mode_senti_short.pkl"
-all_model_checkpoint_paths: "/Users/johnny/Documents/git/ml-train/ml-train/senti/model/mode_senti_short.pkl"
+model_checkpoint_path: "/Users/johnny/Documents/git/ml-train/ml-train/senti/model/20170823_senti"
+all_model_checkpoint_paths: "/Users/johnny/Documents/git/ml-train/ml-train/senti/model/20170823_senti"

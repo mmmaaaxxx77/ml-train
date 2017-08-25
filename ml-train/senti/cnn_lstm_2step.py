@@ -111,7 +111,7 @@ class SentimentClassifier:
         self.timer = TimeCounter()
         self.comma_tokenizer = lambda x: pseg.cut(x, HMM=True)
         self.vect = FeatureHasher(n_features=self.DICTIONARY_LENGTH, non_negative=True)
-        self.n_layer = 5
+        self.n_layer = 3
         self.n_epoch = 100
 
     def clear_doc(self, doc):
@@ -225,9 +225,9 @@ class SentimentClassifier:
         branch1 = tflearn.conv_1d(net, 128, (2, 512), padding='valid', activation='relu', regularizer="L2")
         branch2 = tflearn.conv_1d(net, 128, (3, 512), padding='valid', activation='relu', regularizer="L2")
         branch3 = tflearn.conv_1d(net, 128, (4, 512), padding='valid', activation='relu', regularizer="L2")
-        branch4 = tflearn.avg_pool_1d(net, kernel_size=(4, 2), strides=1)
-        branch4 = tflearn.conv_1d(branch4, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
-        net = tflearn.merge([branch1, branch2, branch3, branch4], mode='concat', axis=1)
+        #branch4 = tflearn.avg_pool_1d(net, kernel_size=(4, 2), strides=1)
+        #branch4 = tflearn.conv_1d(branch4, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
+        net = tflearn.merge([branch1, branch2, branch3], mode='concat', axis=1)
 
         for n in range(1, self.n_layer):
             net = bidirectional_rnn(
@@ -251,10 +251,9 @@ class SentimentClassifier:
         branch1 = tflearn.conv_1d(net, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
         branch2 = tflearn.conv_1d(net, 128, (2, 2), padding='valid', activation='relu', regularizer="L2")
         branch3 = tflearn.conv_1d(net, 128, (4, 2), padding='valid', activation='relu', regularizer="L2")
-        branch4 = tflearn.avg_pool_1d(net, kernel_size=(4, 2), strides=1)
-        branch4 = tflearn.conv_1d(branch4, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
-        net = tflearn.merge([branch1, branch2, branch3, branch4], mode='concat', axis=0)
-        net = tflearn.dropout(net, 0.5)
+        #branch4 = tflearn.avg_pool_1d(net, kernel_size=(4, 2), strides=1)
+        #branch4 = tflearn.conv_1d(branch4, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
+        net = tflearn.merge([branch1, branch2, branch3], mode='concat', axis=0)
 
         for n in range(1, self.n_layer):
             net = bidirectional_rnn(
