@@ -89,7 +89,7 @@ def gen_train_data(doc_streams, path):
     print("量: {}, {}".format(count, path))
 
 print("開始建立")
-gen_train_data(doc_streams_n, "data/n/train_n2.txt")
+gen_train_data(doc_streams_n, "data/n/train_n3.txt")
 print("n 建立完成")
-gen_train_data(doc_streams_p, "data/p/train_p2.txt")
+gen_train_data(doc_streams_p, "data/p/train_p3.txt")
 print("p 建立完成")
