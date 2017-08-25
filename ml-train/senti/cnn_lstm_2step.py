@@ -306,7 +306,7 @@ class SentimentClassifier:
             tf.reset_default_graph()
             model = self.get_seq_model()
             model.fit(x_train, y_train, validation_set=0.1, show_metric=True,
-                      batch_size=10, run_id="cnn_lstm_seq", n_epoch=self.n_epoch, callbacks=early_stopping_cb)
+                      batch_size=10, run_id="cnn_lstm_seq", n_epoch=self.n_epoch)
             model.save(model_save_path)
         except Exception as e:
             logger.info("early stop")
