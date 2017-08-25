@@ -34,7 +34,7 @@ n_file = ""
 p_file = ""
 valve = 30
 
-total = 100
+total = 300
 
 
 def clear_doc(doc):
