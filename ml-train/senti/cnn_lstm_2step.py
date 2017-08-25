@@ -89,7 +89,7 @@ class EarlyStoppingCallback(tflearn.callbacks.Callback):
 
 class SentimentClassifier:
 
-    TRAINING = True
+    TRAINING = False
 
     SENTI_MODEL_PATH = "model/20170823_senti"
     SEQ_MODEL_PATH = "model/20170823_seq"
@@ -360,5 +360,5 @@ while True:
     print(result)
 
     result = model.predict(input_str)
-    print("######\n{}\n######".format(result[0]))
+    print("######\n[{},{}]\n######".format(result[0][0], result[0][1]))
 
