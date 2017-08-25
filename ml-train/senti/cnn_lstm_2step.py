@@ -94,10 +94,10 @@ class SentimentClassifier:
     SENTI_MODEL_PATH = "model/20170823_senti"
     SEQ_MODEL_PATH = "model/20170823_seq"
 
-    DICTIONARY_LENGTH = 2 ** 15
+    DICTIONARY_LENGTH = 2 ** 18
 
-    MAX_SENTENCE_LENGTH = 10
-    MAX_DOC_SENTENCES_LENGTH = 20
+    MAX_SENTENCE_LENGTH = 30
+    MAX_DOC_SENTENCES_LENGTH = 50
 
     SENTI_THREADHOLD = 0.7
 
@@ -112,7 +112,7 @@ class SentimentClassifier:
         self.comma_tokenizer = lambda x: pseg.cut(x, HMM=True)
         self.vect = FeatureHasher(n_features=self.DICTIONARY_LENGTH, non_negative=True)
         self.n_layer = 3
-        self.n_epoch = 100
+        self.n_epoch = 20
 
     def clear_doc(self, doc):
         # 去除網址和符號
@@ -284,7 +284,7 @@ class SentimentClassifier:
         model = self.get_senti_model()
 
         x_train, y_train = self.gen_data("senti")
-        early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.85)
+        early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.80)
         try:
             model.fit(x_train, y_train, validation_set=0.1, show_metric=True,
                       batch_size=128, run_id="cnn_lstm_senti", n_epoch=self.n_epoch, callbacks=early_stopping_cb)
@@ -300,7 +300,7 @@ class SentimentClassifier:
         logger.info("訓練seq model")
 
         x_train, y_train = self.gen_data("seq")
-        early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.85)
+        early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.80)
 
         try:
             tf.reset_default_graph()
