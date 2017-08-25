@@ -94,7 +94,7 @@ class SentimentClassifier:
     SENTI_MODEL_PATH = "model/20170823_senti"
     SEQ_MODEL_PATH = "model/20170823_seq"
 
-    DICTIONARY_LENGTH = 2 ** 18
+    DICTIONARY_LENGTH = 2 ** 14
 
     MAX_SENTENCE_LENGTH = 30
     MAX_DOC_SENTENCES_LENGTH = 50
