@@ -360,5 +360,5 @@ while True:
     print(result)
 
     result = model.predict(input_str)
-    print("######\n[{},{}]\n######".format(result[0][0], result[0][1]))
+    print("######\n[{:05f},{:05f}]\n######".format(result[0][0], result[0][1]))
 
