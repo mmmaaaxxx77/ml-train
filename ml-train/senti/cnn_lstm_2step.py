@@ -249,9 +249,9 @@ class SentimentClassifier:
 
         net = tflearn.input_data(shape=[None, self.MAX_DOC_SENTENCES_LENGTH, 2], name='input')
         branch1 = tflearn.conv_1d(net, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
-        branch1 = tflearn.max_pool_2d(branch1, 2)
+        branch1 = tflearn.max_pool_1d(branch1, 2)
         branch2 = tflearn.conv_1d(net, 128, (2, 2), padding='valid', activation='relu', regularizer="L2")
-        branch2 = tflearn.max_pool_2d(branch2, 2)
+        branch2 = tflearn.max_pool_1d(branch2, 2)
         #branch3 = tflearn.conv_1d(net, 128, (4, 2), padding='valid', activation='relu', regularizer="L2")
         #branch4 = tflearn.avg_pool_1d(net, kernel_size=(4, 2), strides=1)
         #branch4 = tflearn.conv_1d(branch4, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
@@ -289,7 +289,7 @@ class SentimentClassifier:
         early_stopping_cb = EarlyStoppingCallback(val_acc_thresh=0.80)
         try:
             model.fit(x_train, y_train, validation_set=0.1, show_metric=True,
-                      batch_size=128, run_id="cnn_lstm_senti", n_epoch=self.n_epoch, callbacks=early_stopping_cb)
+                      batch_size=128, run_id="cnn_lstm_senti", n_epoch=self.n_epoch)
         except Exception as e:
             logger.info("early stop")
             print("{}".format(e))
