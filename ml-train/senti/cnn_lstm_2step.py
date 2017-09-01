@@ -159,8 +159,11 @@ class SentimentClassifier:
             sentences = np.zeros((self.MAX_DOC_SENTENCES_LENGTH, 2), dtype=np.float32)
             for seq in self.preprocess(doc, "senti"):
                 predict_result = model.predict([seq])[0]
-                sentences.itemset((count, 0), predict_result[0])
-                sentences.itemset((count, 1), predict_result[1])
+
+                resu_ = [float("%.2f" % predict_result[0]), float("%.2f" % predict_result[1])]
+
+                sentences.itemset((count, 0), resu_[0])
+                sentences.itemset((count, 1), resu_[1])
                 count += 1
                 if count == self.MAX_DOC_SENTENCES_LENGTH:
                     break
