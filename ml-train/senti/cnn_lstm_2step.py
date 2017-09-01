@@ -205,8 +205,8 @@ class SentimentClassifier:
         return x, y
 
     def gen_data(self, type):
-        doc_streams = [self.stream_docs(path='data/n/train_n3.txt', label=0, type=type),
-                       self.stream_docs(path='data/p/train_p3.txt', label=1, type=type)]
+        doc_streams = [self.stream_docs(path='data/n/train_n.txt', label=0, type=type),
+                       self.stream_docs(path='data/p/train_p.txt', label=1, type=type)]
 
         x = []
         y = []
