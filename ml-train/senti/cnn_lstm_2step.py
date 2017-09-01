@@ -89,7 +89,7 @@ class EarlyStoppingCallback(tflearn.callbacks.Callback):
 
 class SentimentClassifier:
 
-    TRAINING = False
+    TRAINING = True
 
     SENTI_MODEL_PATH = "model/20170823_senti"
     SEQ_MODEL_PATH = "model/20170823_seq"
@@ -224,10 +224,10 @@ class SentimentClassifier:
         net = embedding(net, input_dim=self.DICTIONARY_LENGTH, output_dim=512)
         branch1 = tflearn.conv_1d(net, 128, (2, 512), padding='valid', activation='relu', regularizer="L2")
         branch2 = tflearn.conv_1d(net, 128, (3, 512), padding='valid', activation='relu', regularizer="L2")
-        branch3 = tflearn.conv_1d(net, 128, (4, 512), padding='valid', activation='relu', regularizer="L2")
+        #branch3 = tflearn.conv_1d(net, 128, (4, 512), padding='valid', activation='relu', regularizer="L2")
         #branch4 = tflearn.avg_pool_1d(net, kernel_size=(4, 2), strides=1)
         #branch4 = tflearn.conv_1d(branch4, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
-        net = tflearn.merge([branch1, branch2, branch3], mode='concat', axis=1)
+        net = tflearn.merge([branch1, branch2], mode='concat', axis=1)
 
         for n in range(1, self.n_layer):
             net = bidirectional_rnn(
@@ -248,12 +248,14 @@ class SentimentClassifier:
         logger.info("建立網路")
 
         net = tflearn.input_data(shape=[None, self.MAX_DOC_SENTENCES_LENGTH, 2], name='input')
+        """
         branch1 = tflearn.conv_1d(net, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
         branch2 = tflearn.conv_1d(net, 128, (2, 2), padding='valid', activation='relu', regularizer="L2")
         branch3 = tflearn.conv_1d(net, 128, (4, 2), padding='valid', activation='relu', regularizer="L2")
         #branch4 = tflearn.avg_pool_1d(net, kernel_size=(4, 2), strides=1)
         #branch4 = tflearn.conv_1d(branch4, 128, (1, 2), padding='valid', activation='relu', regularizer="L2")
         net = tflearn.merge([branch1, branch2, branch3], mode='concat', axis=1)
+        """
 
         for n in range(1, self.n_layer):
             net = bidirectional_rnn(
